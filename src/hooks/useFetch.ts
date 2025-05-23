@@ -4,6 +4,12 @@ type httpMethods = "get" | "post" | "put" | "patch" | "delete";
 
 type useFetchReturnType<T> = [boolean, T | null, boolean];
 
+type OptionType = {
+  method: httpMethods;
+  headers: Record<string, string>;
+  body?: string;
+};
+
 const useFetch = <T>(
   url: string,
   method: httpMethods,
@@ -15,26 +21,29 @@ const useFetch = <T>(
   const [response, setResponse] = useState(null);
 
   async function operate() {
+    const options: OptionType = {
+      method: method,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    if (method !== "get" && method !== "delete") {
+      options.body = JSON.stringify(payload);
+    }
     try {
       setIsLoading(true);
-      const result = await fetch(url, {
-        method: method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const result = await fetch(url, options);
       if (!result.ok) {
         throw new Error("issue with request");
       }
-
       const data = await result.json();
       setResponse(data);
-      setIsLoading(false);
     } catch (err) {
-      setIsLoading(false);
       setIsError(true);
       console.log(err);
+    } finally {
+      setIsLoading(false);
     }
   }
   useEffect(() => {
