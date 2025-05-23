@@ -12,13 +12,13 @@ type OptionType = {
 
 const useFetch = <T>(
   url: string,
-  method: httpMethods,
-  condition: boolean,
+  method: httpMethods = "get",
+  condition: boolean = true,
   payload?: object
-) => {
+): useFetchReturnType<T> => {
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [response, setResponse] = useState(null);
+  const [data, setData] = useState(null);
 
   async function operate() {
     const options: OptionType = {
@@ -38,7 +38,7 @@ const useFetch = <T>(
         throw new Error("issue with request");
       }
       const data = await result.json();
-      setResponse(data);
+      setData(data);
     } catch (err) {
       setIsError(true);
       console.log(err);
@@ -54,9 +54,7 @@ const useFetch = <T>(
     }
   }, []);
 
-  const useFetchResult: useFetchReturnType<T> = [isLoading, response, isError];
-
-  return useFetchResult;
+  return [isLoading, data, isError];
 };
 
 export default useFetch;
